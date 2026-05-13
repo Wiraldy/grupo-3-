@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Little Caesars Pizza - Sucursales</title>
+<link rel="icon" href="logo.jpg">
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+
+<!-- Tailwind CSS + Google Fonts + Font Awesome (MISMO que index) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+  /* Estilos específicos para el mapa y modales (originales) */
+  #map, .branch-map, .leaflet-container * { z-index: 1 !important; }
+  .modal, .modal * { z-index: 9999 !important; }
+  
+  :root{
+    --brand:#ff6600;
+    --brand-dark:#e65500;
+    --dark:#222;
+    --muted:#6b6b6b;
+    --bg:#fafafa;
+    --card:#fff;
+    --cluster-bg: #ff6600;
+    --cluster-text: #fff;
+  }
+  
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;font-family:'Inter', 'Segoe UI', sans-serif;background:var(--bg);color:var(--dark);}
+  
+  /* Forzar que el contenido no quede oculto bajo el nav fijo */
+  body {
+    padding-top: 64px;
+  }
+  
+  /* Estilos nav-link con subrayado animado exacto a index */
+  .nav-link {
+    position: relative;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: #ff6b35;
+    transition: width 0.3s ease;
+  }
+  
+  .nav-link:hover::after {
+    width: 100%;
+  }
+  
+  .nav-link:hover {
+    color: #f97316 !important;
+  }
+  
+  /* Gradient text exacto como index */
+  .gradient-text {
+    background: linear-gradient(45deg, #2e0204, #f7931e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .font-bebas {
+    font-family: 'Bebas Neue', cursive;
+  }
+  
+  /* Contenedor principal para el contenido (sucursales) */
+  .content-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px 24px;
+  }
+  
+  /* Buscador y cards (mismo estilo original) */
+  .search-wrap{
+    display:flex;
+    justify-content:center;
+    margin:24px 0;
+  }
+  .search-box{
+    width:100%;
+    max-width:700px;
+    display:flex;
+    align-items:center;
+    background:#fff;
+    border-radius:50px;
+    padding:6px 8px;
+    border:2px solid #e0e0e0;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+    transition:all 0.3s ease;
+  }
+  .search-box:focus-within{
+    border-color:var(--brand);
+    box-shadow:0 6px 20px rgba(255,102,0,.15);
+    transform:translateY(-2px);
+  }
+  .search-input{
+    flex:1;
+    border:0;
+    padding:12px 18px;
+    font-size:16px;
+    outline:none;
+    border-radius:50px;
+  }
+  .search-btn{
+    background:var(--brand);
+    border:0;
+    color:#fff;
+    padding:12px 24px;
+    border-radius:50px;
+    font-weight:700;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    text-transform:uppercase;
+    font-size:14px;
+  }
+  .search-btn:hover{
+    background:var(--brand-dark);
+    transform:scale(1.05);
+  }
+  .suggestions{
+    max-width:700px;
+    margin:8px auto 0;
+    background:#fff;
+    border-radius:12px;
+    border:1px solid #e6e6e6;
+    box-shadow:0 8px 24px rgba(0,0,0,.1);
+    overflow:hidden;
+    display:none;
+    position:relative;
+    z-index:60;
+  }
+  .suggestion-item{
+    padding:12px 18px;
+    cursor:pointer;
+    border-bottom:1px solid #f4f4f4;
+    transition:all 0.2s ease;
+  }
+  .suggestion-item:last-child{border-bottom:0}
+  .suggestion-item:hover{
+    background:#fff6ee;
+    padding-left:24px;
+  }
+  
+  /* Main Layout - Two columns (original) */
+  .main-layout{
+    display:grid;
+    grid-template-columns:1fr 650px;
+    gap:24px;
+    margin-top:24px;
+    align-items:start;
+  }
+  .branches-column{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+  }
+  .results-head{
+    background:#fff;
+    padding:16px 20px;
+    border-radius:12px 12px 0 0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:3px solid var(--brand);
+    margin-bottom:0;
+  }
+  .results-head h2{
+    margin:0;
+    font-size:1.3rem;
+    color:var(--brand);
+    font-weight:800;
+  }
+  .count-badge{
+    background:var(--brand);
+    color:#fff;
+    padding:4px 12px;
+    border-radius:20px;
+    font-size:0.85rem;
+    font-weight:700;
+  }
+  #cards{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    background:#fff;
+    border-radius:0 0 12px 12px;
+    overflow:hidden;
+    box-shadow:0 4px 16px rgba(0,0,0,.06);
+  }
+  .branch-card{
+    padding:20px 24px;
+    border-bottom:1px solid #e8e8e8;
+    transition:all 0.3s ease;
+    cursor:pointer;
+    background:#fff;
+  }
+  .branch-card:last-child{
+    border-bottom:0;
+    border-radius:0 0 12px 12px;
+  }
+  .branch-card:hover{
+    background:#fffbf7;
+    box-shadow:inset 0 0 0 2px var(--brand);
+  }
+  .branch-card h3{
+    color:var(--brand);
+    font-size:1.1rem;
+    margin:0 0 8px 0;
+    font-weight:800;
+    text-transform:uppercase;
+    cursor:pointer;
+  }
+  .branch-card .city{
+    color:var(--muted);
+    font-size:0.9rem;
+    margin-bottom:8px;
+    font-weight:600;
+  }
+  .branch-card .address{
+    color:var(--dark);
+    font-size:0.9rem;
+    line-height:1.5;
+    margin-bottom:12px;
+  }
+  .branch-card .hours{
+    font-size:0.85rem;
+    line-height:1.6;
+    margin-bottom:16px;
+  }
+  .branch-actions{
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .order-btn{
+    background:var(--brand);
+    border:2px solid var(--brand);
+    color:#fff;
+    padding:10px 20px;
+    border-radius:6px;
+    font-weight:700;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    text-transform:uppercase;
+    font-size:13px;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .order-btn:hover{
+    background:var(--brand-dark);
+    border-color:var(--brand-dark);
+    transform:translateY(-2px);
+    box-shadow:0 4px 12px rgba(255,102,0,.3);
+  }
+  .fav-btn{
+    background:transparent;
+    border:2px solid #ddd;
+    color:#999;
+    padding:10px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    font-size:18px;
+    line-height:1;
+  }
+  .fav-btn.active{
+    background:var(--brand);
+    color:#fff;
+    border-color:var(--brand);
+  }
+  .map-btn{
+    background:transparent;
+    border:2px solid #ddd;
+    color:#666;
+    padding:10px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    font-size:16px;
+  }
+  .map-btn:hover{
+    border-color:var(--brand);
+    color:var(--brand);
+    background:#fff6ee;
+  }
+  .map-column{
+    position: sticky;
+    top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .map-panel{
+    background:#fff;
+    border-radius:12px;
+    padding:20px;
+    box-shadow:0 4px 16px rgba(0,0,0,.06);
+  }
+  .map-panel h3{
+    color:var(--brand);
+    font-size:1.2rem;
+    margin:0 0 16px 0;
+    font-weight:800;
+  }
+  .mapbox{
+    height:400px;
+    border-radius:12px;
+    overflow:hidden;
+    border:2px solid #eee;
+  }
+  .favorites-panel{
+    background:#fff;
+    border-radius:12px;
+    padding:20px;
+    box-shadow:0 4px 16px rgba(0,0,0,.06);
+  }
+  .favorites-header{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:16px;
+    color:var(--brand);
+    font-weight:800;
+    font-size:1.1rem;
+  }
+  .favorites-header::before{
+    content:'★';
+    font-size:1.3rem;
+  }
+  .favorites-list{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    max-height:300px;
+    overflow-y:auto;
+  }
+  .fav-item{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px;
+    border-radius:8px;
+    border:1px solid #f1f1f1;
+    background:#fafafa;
+    cursor:pointer;
+    transition:all 0.3s ease;
+  }
+  .fav-item:hover{
+    border-color:var(--brand);
+    background:#fff6ee;
+  }
+  .empty-state{
+    text-align:center;
+    padding:40px 20px;
+    color:var(--muted);
+  }
+  .modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.65);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:200;
+    padding:20px;
+    backdrop-filter:blur(4px);
+  }
+  .modal-box{
+    background:#fff;
+    border-radius:16px;
+    padding:28px;
+    max-width:900px;
+    width:100%;
+    position:relative;
+    display:grid;
+    grid-template-columns:1fr 380px;
+    gap:24px;
+    box-shadow:0 20px 60px rgba(0,0,0,.3);
+    animation:modalSlideIn 0.3s ease;
+  }
+  @keyframes modalSlideIn{
+    from{opacity:0;transform:translateY(-30px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  .modal-close{
+    position:absolute;
+    right:16px;
+    top:12px;
+    font-size:28px;
+    cursor:pointer;
+    color:#999;
+    transition:all 0.3s ease;
+    width:36px;
+    height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+  }
+  .modal-close:hover{
+    background:#f0f0f0;
+    color:var(--brand);
+    transform:rotate(90deg);
+  }
+  .order-modal-box{
+    background:#fff;
+    border-radius:16px;
+    padding:32px;
+    max-width:600px;
+    width:100%;
+    text-align:center;
+  }
+  .order-modal-box h2{
+    color:var(--brand);
+    margin-bottom:16px;
+  }
+  .providers{
+    display:flex;
+    gap:20px;
+    justify-content:center;
+    margin-top:28px;
+  }
+  .provider{
+    flex:1;
+    padding:20px;
+    border-radius:12px;
+    border:3px solid #ddd;
+    cursor:pointer;
+    transition:all 0.3s ease;
+  }
+  .provider.uber{border-color:#1dbf73}
+  .provider.pya{border-color:#ff3b3b}
+  .branch-info h3{
+    margin:0 0 12px 0;
+    color:var(--brand);
+    font-size:1.4rem;
+  }
+  .branch-map{
+    height:320px;
+    border-radius:12px;
+    border:2px solid #eee;
+    overflow:hidden;
+  }
+  .leaflet-marker-icon.small-logo{
+    border-radius:50%;
+    box-shadow:0 4px 12px rgba(0,0,0,.25);
+    border:3px solid #fff;
+  }
+  .marker-cluster-small{
+    background-color:var(--cluster-bg);
+    border-radius:50%;
+    color:var(--cluster-text);
+    border:4px solid #fff;
+    box-shadow:0 4px 12px rgba(0,0,0,.3);
+  }
+  @media(max-width:1200px){
+    .main-layout{ grid-template-columns:1fr; }
+    .map-column{ position:relative; top:0; }
+    .modal-box{ grid-template-columns:1fr; max-width:600px; }
+  }
+  @media(max-width:768px){
+    .map-column{ position:relative; }
+  }
+</style>
+</head>
+<body class="bg-gray-50 font-inter">
+
+  <!-- ============================================= -->
+  <!-- NAVBAR EXACTAMENTE IGUAL QUE index.html         -->
+  <!-- Mismo HTML, mismas clases, mismo logo, misma tipografía -->
+  <!-- ============================================= -->
+  <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center">
+          <img src="logo.jpg" alt="Caesars" class="h-10 w-auto">
+          <span class="font-bebas text-3xl ml-3 gradient-text">Little caesars</span>
+        </div>
+        <div class="hidden md:block">
+          <div class="ml-10 flex items-baseline space-x-8">
+            <a href="index.html" class="nav-link text-gray-900 hover:text-orange-500 px-3 py-2 text-sm font-medium">INICIO</a>
+            <a href="menu.php" class="nav-link text-gray-900 hover:text-orange-500 px-3 py-2 text-sm font-medium">MENÚ</a>
+            <a href="contacto.html" class="nav-link text-gray-900 hover:text-orange-500 px-3 py-2 text-sm font-medium">CONTACTO</a>
+            <a href="sucursales.html" class="nav-link text-gray-900 hover:text-orange-500 px-3 py-2 text-sm font-medium">SUCURSALES</a>
+            <a href="acerca-de-nosotros.html" class="nav-link text-gray-900 hover:text-orange-500 px-3 py-2 text-sm font-medium">NOSOTROS</a>
+          </div>
+        </div>
+        <div class="md:hidden">
+          <button id="mobile-menu-button" class="text-gray-900 hover:text-orange-500">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Menú mobile (igual que index) -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+      <div class="px-2 pt-2 pb-3 space-y-1">
+        <a href="index.html" class="block px-3 py-2 text-gray-900 hover:text-orange-500 font-medium">INICIO</a>
+        <a href="menu.php" class="block px-3 py-2 text-gray-900 hover:text-orange-500 font-medium">MENÚ</a>
+        <a href="contacto.html" class="block px-3 py-2 text-gray-900 hover:text-orange-500 font-medium">CONTACTO</a>
+        <a href="sucursales.html" class="block px-3 py-2 text-gray-900 hover:text-orange-500 font-medium">SUCURSALES</a>
+        <a href="acerca-de-nosotros.html" class="block px-3 py-2 text-gray-900 hover:text-orange-500 font-medium">NOSOTROS</a>
+      </div>
+    </div>
+  </nav>
+
+<main class="container" role="main">
+  <div class="search-wrap">
+    <div class="search-box" role="search" aria-label="Buscar sucursal">
+      <input id="searchInput" class="search-input" type="search" placeholder="Buscar sucursal o ciudad…" aria-label="Buscar sucursal" autocomplete="off">
+      <button id="searchBtn" class="search-btn" aria-label="Buscar">Buscar</button>
+    </div>
+  </div>
+
+  <div id="autocomplete" class="suggestions" role="listbox" aria-label="Sugerencias"></div>
+
+  <div class="main-layout">
+    <!-- Left Column: Branch Cards -->
+    <div class="branches-column">
+      <div class="results-head">
+        <h2>Sucursales</h2>
+        <span class="count-badge"><span id="count">0</span> resultados</span>
+      </div>
+      <div id="cards"></div>
+    </div>
+
+    <!-- Right Column: Map and Favorites -->
+    <div class="map-column">
+      <div class="map-panel">
+        <h3>Mapa General</h3>
+        <div id="map" class="mapbox" role="region" aria-label="Mapa de sucursales"></div>
+      </div>
+
+      <div class="favorites-panel" id="favoritesPanel">
+        <div class="favorites-header">Favoritos</div>
+        <div id="favoritesList" class="favorites-list"></div>
+        <div id="emptyFavorites" class="empty-state" style="display:none">
+          <p>No tienes sucursales favoritas</p>
+          <p style="font-size:12px;margin-top:8px">Haz clic en ★ para agregar favoritos</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Branch modal -->
+<div id="branchModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal-box" role="document">
+    <div class="modal-close" id="closeBranch">✕</div>
+    <div class="branch-info">
+      <h3 id="bName"></h3>
+      <p id="bAddress"></p>
+      <p><strong>Horario Lunes–Miercoles:</strong> <span id="bH1"></span></p>
+      <p><strong>Horario Jueves–Domingo:</strong> <span id="bH2"></span></p>
+      <p><strong>Teléfono:</strong> <span id="bPhone"></span></p>
+      <div style="margin-top:20px;display:flex;gap:12px">
+        <button class="order-btn" id="btnOrderHere">🍕 ORDENAR AQUÍ</button>
+        <button class="fav-btn" id="btnFav">☆</button>
+      </div>
+    </div>
+    <div>
+      <div id="branchMap" class="branch-map" aria-label="Mapa de sucursal"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Order provider chooser modal -->
+<div id="orderModal" class="modal" aria-hidden="true">
+  <div class="order-modal-box" role="dialog" aria-modal="true">
+    <div class="modal-close" id="closeOrder">✕</div>
+    <h2>ESTÁS SALIENDO DE LA PÁGINA DE LITTLE CAESARS</h2>
+    <p style="margin-top:12px">Serás redirigido a un proveedor externo para realizar tu pedido. Por favor selecciona una opción.</p>
+    <div class="providers">
+      <div class="provider uber" id="uberBtn" role="button" tabindex="0">
+        <img src="ubereat.png" alt="Uber Eats" style="height:40px">
+      </div>
+      <div class="provider pya" id="pyaBtn" role="button" tabindex="0">
+        <img src="pedido.jpg" alt="PedidosYa" style="height:40px">
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:24px">Esta página será manejada por un proveedor externo. Little Caesars no se responsabiliza por contenido externo.</p>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+<script>
+const branches = [
+{"id":1,"name":"ALMA ROSA","city":"Santo Domingo Este","address":"Carretera Mella, esquina Virgilio Mainardi Reyna, estación de combustibles TEXACO, Alma Rosa","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295936224","lat":18.4800,"lng":-69.8200},
+{"id":2,"name":"ALMACENES GARRIDO","city":"Santo Domingo Este","address":"Marginal Av. Las Américas KM 14 casi esq. Av. Hipódromo","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295936222","lat":18.4790,"lng":-69.7800},
+{"id":3,"name":"AUT. DUARTE","city":"Santo Domingo","address":"Autopista Duarte Km 10 1/2 estación de combustibles Texaco La Salida","hours1":"10 am a 11 pm","hours2":"10 pm a 12 am","phone":"8295936216","lat":18.5000,"lng":-69.9000},
+{"id":4,"name":"AUT. SAN ISIDRO","city":"Santo Domingo Este","address":"Calle Marginal Norte de la Autopista San Isidro esq. Calle Pompeya","hours1":"11 am a 10 pm","hours2":"11 am a 11 pm","phone":"8295936221","lat":18.4700,"lng":-69.8000},
+{"id":5,"name":"AVENIDA ESPAÑA","city":"Santo Domingo Este","address":"Avenida España próximo al Acuario Nacional, Estación de Combustible Petromóvil","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295936218","lat":18.4700,"lng":-69.9000},
+{"id":6,"name":"AZUA","city":"Azua","address":"Avenida Duarte, esquina Ntra Sra. de Fátima. Estación de Combustible Shell Mambo","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":null,"lat":18.4560,"lng":-70.7440},
+{"id":7,"name":"BANÍ","city":"Baní","address":"KM. 1 1/2. carretera Sánchez. Estación de Combustible Eco Petróleo","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":null,"lat":18.3210,"lng":-70.2550},
+{"id":8,"name":"BARRIO MEJORAMIENTO SOCIAL","city":"Santo Domingo","address":"Calle Josefa Brea, esq. Teniente Amado García. Estación de combustible Texaco","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":null,"lat":18.4800,"lng":-69.9000},
+{"id":9,"name":"BELLA VISTA, SANTIAGO","city":"Santiago","address":"Avenida Pte. Antonio Guzmán, no. 30. Estación de combustible Shell","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":null,"lat":19.4500,"lng":-70.7000},
+{"id":10,"name":"BOCA CHICA","city":"Boca Chica","address":"Autopista Las Américas km 29.5 Andrés Boca Chica. Estación SIGMA La Caleta","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295472198","lat":18.4419,"lng":-69.6323},
+{"id":11,"name":"BONAO","city":"Bonao","address":"Calle Duarte. Esquina doctor Columna. Estación de combustible Atlantic","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":null,"lat":18.8290,"lng":-70.4019},
+{"id":12,"name":"CHARLES DE GAULLE","city":"Santo Domingo Este","address":"Ave. Charles de Gaulle casi esq. Carretera Mella, Estación de Combustible Next","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295936223","lat":18.4800,"lng":-69.8700},
+{"id":13,"name":"COLINAS MALL, SANTIAGO","city":"Santiago","address":"Avenida 27 de febrero esquina Avenida Imbert, Plaza Colinas Mall, 3er Nivel","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8093321054","lat":19.4500,"lng":-70.7000},
+{"id":14,"name":"COTUÍ","city":"Cotuí","address":"Plaza Paula, Prol. 27 de Febrero 50","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":null,"lat":19.0597,"lng":-70.0839},
+{"id":15,"name":"ESTRELLA SADHALÁ, SANTIAGO","city":"Santiago","address":"Avenida Estrella Sadhalá esq. Carretera Jacagua, Estación de Combustible Shell","hours1":"11 am a 11 pm","hours2":"11 am a 11 pm","phone":"8293782900","lat":19.4500,"lng":-70.7000},
+{"id":16,"name":"FRIUSA","city":"Santo Domingo","address":"Avenida España, esquina Estados Unidos, Friusa Center","hours1":"10 am a 12 pm","hours2":"10 am a 12 pm","phone":null,"lat":18.4861,"lng":-69.9312},
+{"id":17,"name":"HAINA","city":"Haina","address":"Avenida Río Haina #37 Plaza Cristal, Bajos de Haina, San Cristóbal","hours1":"10 am a 11 pm","hours2":"10 am a 11 pm","phone":null,"lat":18.4030,"lng":-70.1220},
+{"id":18,"name":"HERMANAS MIRABAL","city":"Villa Mella","address":"Avenida Hermanas Mirabal #273, Antigua Ferretería Ventura, Villa Mella","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295472796","lat":18.5667,"lng":-69.8667},
+{"id":19,"name":"HIGÜEY","city":"Higüey","address":"Avenida Hermanos Trejo esq. Calle General Santana, Higüey","hours1":"10 am a 12 pm","hours2":"10 am a 12 pm","phone":"8295472899","lat":18.6120,"lng":-68.7130},
+{"id":20,"name":"INDEPENDENCIA","city":"Santo Domingo","address":"Av Independencia Km 8 1/2, Estación de Combustible Petromóvil, sector Miramar","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295936215","lat":18.4800,"lng":-69.9600},
+{"id":21,"name":"JACOBO MAJLUTA","city":"Los Guaricanos","address":"Avenida Jacobo Majluta KM 4½, Los Guaricanos","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":null,"lat":18.6000,"lng":-69.9000},
+{"id":22,"name":"LA HÍPICA","city":"Santo Domingo Este","address":"Avenida Hípica, Estación de combustibles SIGMA sector Ciudad del Este","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295475750","lat":18.4700,"lng":-69.8600},
+{"id":23,"name":"LA MONUMENTAL","city":"Santo Domingo","address":"Av República de Colombia, casi esquina Av La Monumental, Estación Next","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295947233","lat":18.4800,"lng":-69.9200},
+{"id":24,"name":"LA ROMANA","city":"La Romana","address":"Estación de Combustible Total Lumay. Autopista del Este (Al lado de Multiplaza La Romana)","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295936225","lat":18.4340,"lng":-68.9720},
+{"id":25,"name":"LA VEGA","city":"La Vega","address":"Av. Imbert #5, Estación de Combustible Petromóvil","hours1":"11 am a 11 pm","hours2":"11 am a 11 pm","phone":"8295936227","lat":19.2136,"lng":-70.5296},
+{"id":26,"name":"LA VECINA","city":"Santo Domingo","address":"Av. Núñez de Cáceres estación de combustibles Total La Vecina","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295936212","lat":18.4750,"lng":-69.9300},
+{"id":27,"name":"LEOPOLDO NAVARRO","city":"Santo Domingo","address":"Avenida Leopoldo Navarro Estación de Combustible Texaco Piloto","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":null,"lat":18.4800,"lng":-69.9500},
+{"id":28,"name":"LOPE DE VEGA","city":"Santo Domingo","address":"Av. Lope de Vega esq. John F. Kennedy. Estación de Combustible Total Mega","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295936210","lat":18.4800,"lng":-69.9500},
+{"id":29,"name":"LOS ALCARRIZOS","city":"Los Alcarrizos","address":"Autopista Duarte, Kilometro 14. Tienda Garrido","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":null,"lat":18.5300,"lng":-69.9889},
+{"id":30,"name":"LOS MINA","city":"Los Mina","address":"Av. San Vicente de Paúl esq. Arzobispo Fernández de Navarrete, Estación Total","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295475255","lat":18.4865,"lng":-69.8760},
+{"id":31,"name":"LOS PRADOS","city":"Santo Domingo","address":"Av. Charles Summer #26 esq. Nicolás Ureña de Mendoza, Estación Texaco","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295936213","lat":18.4800,"lng":-69.9200},
+{"id":32,"name":"MADRE VIEJA","city":"San Cristóbal","address":"Carretera Sánchez, Estación SIGMA Madre Vieja","hours1":"10 am a 11 pm","hours2":"10 am a 11 pm","phone":null,"lat":18.4100,"lng":-70.1200},
+{"id":33,"name":"MAMÁ TINGO","city":"Santo Domingo Norte","address":"Avenida Hermanas Mirabal casi esquina Calle Primera, Estación Eco Petróleo","hours1":"10 am a 11 pm","hours2":"10 am a 11 pm","phone":null,"lat":18.6000,"lng":-69.9500},
+{"id":34,"name":"MOCA","city":"Moca","address":"Calle Duarte #61, estación de combustibles Texaco Las Mercedes","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295473452","lat":19.4167,"lng":-70.4036},
+{"id":35,"name":"PEDRO LIVIO CEDEÑO","city":"Santo Domingo","address":"Av. Pedro Livio Cedeño esq. Juan Pablo Duarte, Estación Texaco","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295472794","lat":18.4800,"lng":-69.9200},
+{"id":36,"name":"PEKIN","city":"Santiago","address":"Avenida Circunvalación, esq. Urbanización Fernando Valerio. Estación de combustible Texaco","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":null,"lat":19.4500,"lng":-70.7000},
+{"id":37,"name":"PLAZA CEILO","city":"Herrera","address":"Av. 27 de Febrero #4, esq. Calle H. Plaza Ceilo, Herrera, Santo Domingo Oeste","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295936214","lat":18.4500,"lng":-69.9000},
+{"id":38,"name":"POLANQUITO","city":"Santo Domingo","address":"Avenida Isabel Aguiar, no. 43, Estación de combustible Total San Miguel","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":null,"lat":18.4700,"lng":-69.9300},
+{"id":39,"name":"QUISQUEYA","city":"Santo Domingo","address":"Av. Máximo Gómez #205, estación de combustibles Total Quisqueya","hours1":"9 am a 10 pm","hours2":"9 am a 11 pm","phone":"8295936211","lat":18.4700,"lng":-69.9300},
+{"id":40,"name":"ROBERTO PASTORIZA","city":"Santo Domingo","address":"Avenida Roberto Pastoriza, número 315, Plaza Uris, Ensanche Naco","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295936219","lat":18.4660,"lng":-69.9300},
+{"id":41,"name":"RÓMULO","city":"Bella Vista","address":"Av. Rómulo Betancourt #295, Bella Vista","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295936209","lat":18.4700,"lng":-69.9300},
+{"id":42,"name":"SAN CRISTÓBAL","city":"San Cristóbal","address":"Avenida Constitución, esquina Calle Mella, antiguo Banco del Progreso","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295472797","lat":18.4111,"lng":-70.1028},
+{"id":43,"name":"SAN FCO. DE MACORÍS","city":"San Francisco de Macorís","address":"Avenida Libertad #67, parqueo del Supermercado Porvenir","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295472795","lat":19.3000,"lng":-70.2500},
+{"id":44,"name":"SAN LUIS","city":"San Luis","address":"Carretera Mella, Esquina corazón de Jesus, Estación PETRONAN San Luis","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":null,"lat":18.4500,"lng":-69.8600},
+{"id":45,"name":"SAN PEDRO DE MACORÍS","city":"San Pedro de Macorís","address":"Avenida Rolando Martínez entre calle José A. Carburcia y Sergio A. Beras, Estación de Combustible TEXACO","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295472439","lat":18.4663,"lng":-69.3086},
+{"id":46,"name":"TELEFÉRICO","city":"Los Alcarrizos","address":"Estación de combustibles Total Los Alcarrizos, Los Alcarrizos, Santo Domingo","hours1":"10 am a 11 pm","hours2":"10 am a 12 am","phone":null,"lat":18.5300,"lng":-69.9889},
+{"id":47,"name":"VERÓN - PUNTA CANA","city":"Punta Can","address":"Carretera Verón Punta Cana, local 11. Marlin Shopping Center","hours1":"10 am a 12 am","hours2":"10 am a 12 am","phone":null,"lat":18.5686,"lng":-68.3630},
+{"id":48,"name":"VILLA ALTAGRACIA","city":"Villa Altagracia","address":"Av. Juan Pablo Duarte, Estación de Combustibles Shell","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295473218","lat":18.8454,"lng":-70.1746},
+{"id":49,"name":"VILLA MELLA","city":"Villa Mella","address":"Ave. Charles de Gaulle #55 esq. Camino Real, Estación de Combustible Total Los Pinos","hours1":"10 am a 10 pm","hours2":"10 am a 11 pm","phone":"8295936226","lat":18.5667,"lng":-69.8667},
+{"id":50,"name":"ZONA UNIVERSITARIA","city":"Santo Domingo","address":"Av. Correa y Cidrón esq. Padre Pina, próximo a la UASD","hours1":"9 am a 10 pm","hours2":"9 am a 11 pm","phone":"8295936220","lat":18.4687,"lng":-69.8900}];
+
+// Map setup
+const map = L.map('map', {scrollWheelZoom:false, zoomControl:true}).setView([18.7,-69.9],7);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors & CartoDB',
+  maxZoom: 19
+}).addTo(map);
+
+const markersCluster = L.markerClusterGroup({
+  chunkedLoading: true,
+  iconCreateFunction: function(cluster) {
+    const count = cluster.getChildCount();
+    const size = count < 10 ? 36 : (count < 100 ? 44 : 52);
+    return L.divIcon({
+      html: `<div style="width:${size}px;height:${size}px;line-height:${size}px;border-radius:50%;background:var(--cluster-bg);color:var(--cluster-text);font-weight:800;border:4px solid #fff">${count}</div>`,
+      className: 'marker-cluster-small',
+      iconSize: L.point(size, size)
+    });
+  }
+});
+
+const logoIcon = L.icon({
+  iconUrl: 'logo.jpg',
+  iconSize: [48,48],
+  className: 'small-logo',
+  iconAnchor: [24,48],
+  popupAnchor: [0,-44]
+});
+
+const idToMarker = new Map();
+branches.forEach(b=>{
+  const marker = L.marker([b.lat,b.lng], {icon: logoIcon});
+  const popupHtml = `<div style="min-width:200px;text-align:center"><strong style="color:${getComputedStyle(document.documentElement).getPropertyValue('--brand')};font-size:1.1rem">${escapeHtml(b.name)}</strong><div style="color:#555;font-size:13px;margin-top:8px">${escapeHtml(b.city)}</div><div style="margin-top:10px"><button onclick="openBranchFromPopup(${b.id})" style="background:var(--brand);color:#fff;border:0;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:700">Ver Detalles</button></div></div>`;
+  marker.bindPopup(popupHtml, {minWidth:220, closeButton:true});
+  markersCluster.addLayer(marker);
+  idToMarker.set(b.id, marker);
+});
+map.addLayer(markersCluster);
+map.fitBounds(L.latLngBounds(branches.map(b=>[b.lat,b.lng])).pad(0.15), {maxZoom:8});
+
+// UI Elements
+const cardsEl = document.getElementById('cards');
+const favoritesList = document.getElementById('favoritesList');
+const emptyFavorites = document.getElementById('emptyFavorites');
+const countEl = document.getElementById('count');
+const searchInput = document.getElementById('searchInput');
+const searchBtn = document.getElementById('searchBtn');
+const autocomplete = document.getElementById('autocomplete');
+
+function formatPhone(p){ return p ? (p.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3')) : ''; }
+function escapeHtml(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function getFavorites(){
+  return JSON.parse(localStorage.getItem('lc_favs_v1')||'[]');
+}
+
+function renderFavorites(){
+  const favs = getFavorites();
+  favoritesList.innerHTML = '';
+  if(favs.length === 0){
+    emptyFavorites.style.display = 'block';
+    favoritesList.style.display = 'none';
+  } else {
+    emptyFavorites.style.display = 'none';
+    favoritesList.style.display = 'flex';
+    const favBranches = branches.filter(b => favs.includes(b.id));
+    favBranches.forEach(b=>{
+      const item = document.createElement('div');
+      item.className='fav-item';
+      item.innerHTML = `<div class="fav-item-info"><h4>${escapeHtml(b.name)}</h4><p>${escapeHtml(b.city)}</p></div><button class="fav-item-btn" data-id="${b.id}">Ordenar</button>`;
+      item.querySelector('.fav-item-info').addEventListener('click', ()=> openBranchModalById(b.id));
+      item.querySelector('.fav-item-btn').addEventListener('click', (e)=> { e.stopPropagation(); openOrderChooser(b.id); });
+      favoritesList.appendChild(item);
+    });
+  }
+}
+
+function render(list){
+  cardsEl.innerHTML='';
+  countEl.textContent = list.length;
+  list.forEach(b=>{
+    const card = document.createElement('div');
+    card.className='branch-card';
+    const isFav = getFavorites().includes(b.id);
+    card.innerHTML = `<h3 data-id="${b.id}">${escapeHtml(b.name)}</h3><div class="city">${escapeHtml(b.city)}</div><div class="address">${escapeHtml(b.address)}</div><div class="hours"><strong>Lunes–Miercoles:</strong> ${escapeHtml(b.hours1)}<br><strong>Jueves–Domingo:</strong> ${escapeHtml(b.hours2)}</div><div class="branch-actions"><button class="order-btn" data-id="${b.id}">🍕 ORDENAR AQUÍ</button><button class="fav-btn ${isFav?'active':''}" data-id="${b.id}">${isFav?'★':'☆'}</button><button class="map-btn" data-id="${b.id}" title="Ver en mapa">📍</button></div>`;
+    cardsEl.appendChild(card);
+  });
+  cardsEl.querySelectorAll('h3').forEach(h=>h.addEventListener('click',()=>openBranchModalById(Number(h.dataset.id))));
+  cardsEl.querySelectorAll('.order-btn').forEach(btn=>btn.addEventListener('click',(e)=>{e.stopPropagation();openOrderChooser(Number(btn.dataset.id));}));
+  cardsEl.querySelectorAll('.fav-btn').forEach(btn=>btn.addEventListener('click',(e)=>{e.stopPropagation();toggleFav(Number(btn.dataset.id));}));
+  cardsEl.querySelectorAll('.map-btn').forEach(btn=>btn.addEventListener('click',(e)=>{e.stopPropagation();const id=Number(btn.dataset.id);const branch=branches.find(b=>b.id===id);if(branch){map.setView([branch.lat,branch.lng],15);const marker=idToMarker.get(id);if(marker)marker.openPopup();window.scrollTo({top:0,behavior:'smooth'});}}));
+}
+
+function toggleFav(id){
+  let f = getFavorites();
+  if(f.includes(id)) f = f.filter(x=>x!==id);
+  else f.push(id);
+  localStorage.setItem('lc_favs_v1', JSON.stringify(f));
+  const q = normalizeQuery(searchInput.value);
+  render(branches.filter(b => startsWithMatch(b, q)));
+  renderFavorites();
+}
+
+function normalizeQuery(q){ q = String(q||'').trim().toLowerCase(); if(q === '1') q='a'; return q; }
+function startsWithMatch(item, q){ if(!q) return true; return (item.name||'').toLowerCase().startsWith(q) || (item.city||'').toLowerCase().startsWith(q); }
+
+function showAutocomplete(list){
+  autocomplete.innerHTML='';
+  if(!list.length){ autocomplete.style.display='none'; return; }
+  list.slice(0,8).forEach(b=>{
+    const d=document.createElement('div'); d.className='suggestion-item'; d.textContent=b.name+' - '+b.city;
+    d.addEventListener('click',()=>{ searchInput.value=b.name; autocomplete.style.display='none'; performSelect(b.name); });
+    autocomplete.appendChild(d);
+  });
+  autocomplete.style.display='block';
+}
+function performSelect(value){ const q=normalizeQuery(value); const found=branches.find(b=>b.name.toLowerCase().startsWith(q)||b.city.toLowerCase().startsWith(q)); if(found){ openBranchModal(found); clearSearchAfter(250); } else { clearSearchAfter(150); } }
+function clearSearchAfter(ms){ setTimeout(()=>{ searchInput.value=''; autocomplete.style.display='none'; }, ms); }
+searchInput.addEventListener('input',e=>{ const raw=e.target.value; const q=normalizeQuery(raw); if(q===''){ autocomplete.style.display='none'; render(branches); updateClusterMarkers(branches); return; } const filtered=branches.filter(b=>startsWithMatch(b,q)); render(filtered); updateClusterMarkers(filtered); showAutocomplete(filtered); });
+searchInput.addEventListener('keydown',e=>{ if(e.key==='Enter'){ const raw=e.target.value; const q=normalizeQuery(raw); const filtered=branches.filter(b=>startsWithMatch(b,q)); render(filtered); updateClusterMarkers(filtered); showAutocomplete(filtered); clearSearchAfter(350); } });
+searchBtn.addEventListener('click',()=>{ const raw=searchInput.value; const q=normalizeQuery(raw); const filtered=branches.filter(b=>startsWithMatch(b,q)); render(filtered); updateClusterMarkers(filtered); showAutocomplete(filtered); clearSearchAfter(350); });
+
+function updateClusterMarkers(list){
+  markersCluster.clearLayers();
+  list.forEach(b=>{ const m=idToMarker.get(b.id); if(m) markersCluster.addLayer(m); });
+  const coords=list.map(b=>[b.lat,b.lng]);
+  if(coords.length){ const bounds=L.latLngBounds(coords); map.fitBounds(bounds.pad(0.12),{maxZoom:10}); }
+}
+
+// Branch Modal
+const branchModal = document.getElementById('branchModal');
+const bName = document.getElementById('bName'), bAddress = document.getElementById('bAddress'), bH1 = document.getElementById('bH1'), bH2 = document.getElementById('bH2'), bPhone = document.getElementById('bPhone');
+const btnOrderHere = document.getElementById('btnOrderHere'), btnFav = document.getElementById('btnFav'), closeBranch = document.getElementById('closeBranch');
+let branchMap = null, activeBranch = null;
+function openBranchModalById(id){ const b=branches.find(x=>x.id===id); if(b) openBranchModal(b); }
+function openBranchModal(b){
+  activeBranch=b;
+  bName.textContent=b.name; bAddress.textContent=b.address; bH1.textContent=b.hours1; bH2.textContent=b.hours2; bPhone.textContent=b.phone?formatPhone(b.phone):'No disponible';
+  const isFav=getFavorites().includes(b.id);
+  btnFav.textContent=isFav?'★':'☆'; btnFav.className=isFav?'fav-btn active':'fav-btn'; btnFav.setAttribute('data-id',b.id);
+  branchModal.style.display='flex'; branchModal.setAttribute('aria-hidden','false');
+  setTimeout(()=>{ if(branchMap){ branchMap.remove(); branchMap=null; }
+    branchMap=L.map('branchMap').setView([b.lat,b.lng],16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(branchMap);
+    const fotos=["little.jpg","o.jpg","cisar.jpg"]; const photoUrl=fotos[Math.floor(Math.random()*fotos.length)];
+    const popupHtml=`<div style="min-width:220px;text-align:center"><img src="${photoUrl}" alt="Sucursal Little Caesars" style="width:100%;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.1)"></div>`;
+    const marker=L.marker([b.lat,b.lng],{icon:logoIcon}).addTo(branchMap); marker.bindPopup(popupHtml).openPopup(); branchMap.invalidateSize();
+  },120);
+}
+function closeBranchModal(){ branchModal.style.display='none'; branchModal.setAttribute('aria-hidden','true'); if(branchMap){ branchMap.remove(); branchMap=null; } activeBranch=null; }
+closeBranch.addEventListener('click',()=>closeBranchModal()); branchModal.addEventListener('click',(ev)=>{ if(ev.target===branchModal) closeBranchModal(); });
+window.openBranchFromPopup = function(id){ const b=branches.find(x=>x.id===id); if(b) openBranchModal(b); map.closePopup(); };
+
+// Order Modal
+const orderModal=document.getElementById('orderModal'), closeOrder=document.getElementById('closeOrder'), uberBtn=document.getElementById('uberBtn'), pyaBtn=document.getElementById('pyaBtn');
+function openOrderChooser(branchId){ sessionStorage.setItem('lc_selected_branch',branchId||''); orderModal.style.display='flex'; orderModal.setAttribute('aria-hidden','false'); }
+function closeOrderModal(){ orderModal.style.display='none'; orderModal.setAttribute('aria-hidden','true'); }
+closeOrder.addEventListener('click',()=>closeOrderModal()); orderModal.addEventListener('click',(ev)=>{ if(ev.target===orderModal) closeOrderModal(); });
+uberBtn.addEventListener('click',()=>{ window.open('https://www.ubereats.com','_blank'); });
+pyaBtn.addEventListener('click',()=>{ window.open('https://www.pedidosya.com','_blank'); });
+btnOrderHere.addEventListener('click',()=>{ if(activeBranch) openOrderChooser(activeBranch.id); else openOrderChooser(null); });
+btnFav.addEventListener('click',()=>{ if(!activeBranch) return; toggleFav(activeBranch.id); const isFav=getFavorites().includes(activeBranch.id); btnFav.textContent=isFav?'★':'☆'; btnFav.className=isFav?'fav-btn active':'fav-btn'; });
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ if(orderModal.style.display==='flex') closeOrderModal(); else if(branchModal.style.display==='flex') closeBranchModal(); } });
+
+// Mobile menu button
+const mobileMenuButton = document.getElementById('mobile-menu-button');
+const mobileMenu = document.getElementById('mobile-menu');
+if(mobileMenuButton && mobileMenu){
+  mobileMenuButton.addEventListener('click', () => { mobileMenu.classList.toggle('hidden'); });
+}
+
+window.addEventListener('load',()=>{ render(branches); renderFavorites(); });
+</script>
+</body>
+</html>
