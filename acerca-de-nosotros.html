@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Acerca de Nosotros – Little Caesars</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Anton&family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--orange:#ff6b35;--dark:#1a1a1a;--white:#ffffff;--gray:#f0f0f0;--text-light:#444}
+    body{font-family:'Open Sans',sans-serif;color:var(--dark);background:var(--white)}
+    .font-bebas{font-family:'Bebas Neue',cursive}
+    .gradient-text{background:linear-gradient(45deg,#47281d,#f7931e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .nav-link{position:relative;transition:all 0.3s ease}
+    .nav-link::after{content:'';position:absolute;bottom:-5px;left:0;width:0;height:3px;background:#ff6b35;transition:width 0.3s ease}
+    .nav-link:hover::after,.nav-link.active::after{width:100%}
+    .nav-link.active{color:#f97316!important}
+
+    .hero-banner{background:var(--orange);display:flex;align-items:center;max-width:820px;margin:0 auto;min-height:200px}
+    .hero-icon-wrap{flex-shrink:0;padding:20px 20px 20px 30px;display:flex;align-items:center}
+    .hero-icon-wrap svg{width:140px;height:140px}
+    .hero-title-wrap{flex:1;padding:20px 40px 20px 10px}
+    .hero-title{font-family:'Anton',sans-serif;font-size:2.2rem;color:var(--white);text-transform:uppercase;letter-spacing:0.02em;line-height:1.08}
+
+    .timeline{width:100%;max-width:820px;margin:0 auto}
+    .row{display:grid;grid-template-columns:1fr 1fr}
+    .cell-img{overflow:hidden;min-height:260px}
+    .cell-img img{width:100%;height:100%;object-fit:cover;display:block}
+    .cell-text{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:50px 48px;background:var(--gray)}
+    .cell-text.orange-bg{background:var(--orange);color:var(--white)}
+    .cell-year{font-family:'Anton',sans-serif;font-size:1.5rem;letter-spacing:0.04em;margin-bottom:4px}
+    .cell-title{font-family:'Anton',sans-serif;font-size:1.5rem;letter-spacing:0.03em;text-transform:uppercase;line-height:1.15;margin-bottom:16px}
+    .cell-body{font-size:0.88rem;line-height:1.7;max-width:300px}
+    .cell-text:not(.orange-bg) .cell-body{color:var(--text-light)}
+    .cell-text.orange-bg .cell-body{color:rgba(255,255,255,0.93)}
+
+    footer{border-top:1px solid #ddd;padding:20px 10%}
+    .footer-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+    .footer-links{display:flex;gap:24px;list-style:none}
+    .footer-links a{font-size:0.65rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:var(--dark);text-decoration:none}
+    .footer-links a:hover{text-decoration:underline}
+    .footer-social{display:flex;align-items:center;gap:10px}
+    .footer-social span{font-size:0.65rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase}
+    .social-icon{width:28px;height:28px;border-radius:50%;background:var(--dark);display:flex;align-items:center;justify-content:center;text-decoration:none}
+    .social-icon svg{fill:white;width:13px;height:13px}
+    .footer-copy{margin-top:14px;font-size:0.6rem;color:#999;line-height:1.5}
+
+    @media(max-width:700px){
+      .row{grid-template-columns:1fr}
+      .cell-img{min-height:220px}
+      .hero-title{font-size:1.6rem}
+      .hero-icon-wrap{padding:20px}
+      .hero-icon-wrap svg{width:100px;height:100px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <a href="little (2).html" class="flex items-center">
+        <img src="logo.jpg" alt="Little Caesars" class="h-10 w-auto">
+        <span class="font-bebas text-3xl ml-3 gradient-text">Little Caesars</span>
+      </a>
+      <div class="hidden md:flex items-baseline space-x-8">
+        <a href="index.html" class="nav-link text-gray-900 hover:text-orange-500 px-3 py-2 text-sm font-medium">INICIO</a>
+        <a href="menu.php"       class="nav-link text-gray-900 hover:text-orange-500 px-3 py-2 text-sm font-medium">MENÚ</a>
+        <a href="CONTACTO.html"   class="nav-link text-gray-900 hover:text-orange-500 px-3 py-2 text-sm font-medium">CONTACTO</a>
+        <a href="sucursales.html"      class="nav-link text-gray-900 hover:text-orange-500 px-3 py-2 text-sm font-medium">SUCURSALES</a>
+        <a href="acerca-de-nosotros.html" class="nav-link active text-gray-900 px-3 py-2 text-sm font-medium">NOSOTROS</a>
+      </div>
+      <button id="mb-btn" class="md:hidden text-gray-900"><i class="fas fa-bars text-xl"></i></button>
+    </div>
+  </div>
+  <div id="mb-menu" class="hidden md:hidden bg-white border-t">
+    <div class="px-2 pt-2 pb-3 space-y-1">
+      <a href="index.html" class="block px-3 py-2 text-gray-900 font-medium">INICIO</a>
+      <a href="menu.php"       class="block px-3 py-2 text-gray-900 font-medium">MENÚ</a>
+      <a href="CONTACTO.html"   class="block px-3 py-2 text-gray-900 font-medium">CONTACTO</a>
+      <a href="sucursales.html"      class="block px-3 py-2 text-gray-900 font-medium">SUCURSALES</a>
+      <a href="acerca-de-nosotros.html" class="block px-3 py-2 text-orange-600 font-bold">NOSOTROS</a>
+    </div>
+  </div>
+</nav>
+
+<div style="height:64px;"></div>
+
+<!-- HERO BANNER -->
+<div class="hero-banner">
+  <div class="hero-icon-wrap">
+    <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+      <line x1="80" y1="10" x2="80" y2="0" stroke="#1a1a1a" stroke-width="4" stroke-linecap="round"/>
+      <line x1="110" y1="18" x2="116" y2="9" stroke="#1a1a1a" stroke-width="4" stroke-linecap="round"/>
+      <line x1="132" y1="40" x2="141" y2="34" stroke="#1a1a1a" stroke-width="4" stroke-linecap="round"/>
+      <line x1="50" y1="18" x2="44" y2="9" stroke="#1a1a1a" stroke-width="4" stroke-linecap="round"/>
+      <line x1="28" y1="40" x2="19" y2="34" stroke="#1a1a1a" stroke-width="4" stroke-linecap="round"/>
+      <path d="M80 148 C80 148 18 112 18 72 C18 52 34 44 80 72 C126 44 142 52 142 72 C142 112 80 148 80 148Z" fill="none" stroke="#1a1a1a" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M80 36 L30 105 L130 105 Z" fill="#e05a0a"/>
+      <path d="M30 105 Q80 120 130 105" stroke="#c94a00" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <circle cx="60" cy="82" r="7" fill="#c0392b"/>
+      <circle cx="72" cy="95" r="6" fill="#c0392b"/>
+      <circle cx="100" cy="82" r="7" fill="#c0392b"/>
+      <circle cx="88" cy="95" r="6" fill="#c0392b"/>
+      <line x1="80" y1="36" x2="80" y2="112" stroke="#1a1a1a" stroke-width="3"/>
+      <path d="M80 36 L30 105 L130 105 Z" fill="none" stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="hero-title-wrap">
+    <h1 class="hero-title">Así es como agregamos más de 60<br>años de amor a tu pizza</h1>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div class="timeline">
+  <div class="row">
+    <div class="cell-img"><img src="primera.png" alt="Mike y Marian Ilitch"/></div>
+    <div class="cell-text">
+      <div class="cell-year">1959</div>
+      <div class="cell-title">Grandes Sueños</div>
+      <p class="cell-body">Los jóvenes empresarios Mike y Marian Ilitch invierten los ahorros de toda su vida para abrir un pequeño restaurante de pizzas en Garden City, Michigan.</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="cell-text orange-bg">
+      <div class="cell-year">1962</div>
+      <div class="cell-title">Crecimiento<br>Internacional</div>
+      <p class="cell-body">Ayudando a otros empresarios a realizar su sueño de tener un negocio, comenzamos a operar con franquicias en 1962. La apertura de una tienda en Canadá en 1969 marcó el inicio de nuestro crecimiento internacional.</p>
+    </div>
+    <div class="cell-img"><img src="segunda.png" alt="Primera tienda Little Caesar's"/></div>
+  </div>
+  <div class="row">
+    <div class="cell-img"><img src="3ra.png" alt="Anuncio Pizza!Pizza!"/></div>
+    <div class="cell-text">
+      <div class="cell-year">1979</div>
+      <div class="cell-title">PIZZA!PIZZA!®</div>
+      <p class="cell-body">Con productos nuevos y frases famosas como PIZZA!PIZZA!, que ofrece dos pizzas por el precio de una, la innovación siempre ha sido nuestro ingrediente principal.</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="cell-text orange-bg">
+      <div class="cell-year">2004</div>
+      <div class="cell-title">PIZZA HOT-N-<br>READY® Y MÁS</div>
+      <p class="cell-body">Siempre estamos buscando formas de ofrecer más y en menos tiempo. Pizzas recién salidas del horno desde el momento en que los clientes entran al restaurante. Sin llamar. Sin esperar.</p>
+    </div>
+    <div class="cell-img"><img src="4ta.png" alt="Pizza Hot-N-Ready"/></div>
+  </div>
+  <div class="row">
+    <div class="cell-img"><img src="5ta.png" alt="Familia Little Caesars RD"/></div>
+    <div class="cell-text">
+      <div class="cell-title" style="font-size:1.7rem;margin-bottom:16px;">¡Hola<br>República<br>Dominicana!</div>
+      <p class="cell-body">Nuestra prioridad principal es crear un producto delicioso con un valor increíble. Nuestro menú incluye los ingredientes más frescos que garantizan un producto de alta calidad, listo cuando tú lo desees.</p>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <ul class="footer-links">
+      <li><a href="#">Compañía</a></li>
+      <li><a href="#">Términos y Condiciones</a></li>
+      <li><a href="#">Política de Privacidad</a></li>
+    </ul>
+    <div class="footer-social">
+      <span>Visita nuestras redes sociales</span>
+      <a class="social-icon" href="#"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+      <a class="social-icon" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/></svg></a>
+    </div>
+  </div>
+  <div class="footer-copy">©2002–2026 Little Caesar Enterprises, Inc. Todos los derechos reservados. El nombre, logotipos y marcas relacionadas de Little Caesars® Pizza son marcas registradas con licencia de Little Caesar Enterprises, Inc.</div>
+</footer>
+
+<script>
+document.getElementById('mb-btn').addEventListener('click',()=>document.getElementById('mb-menu').classList.toggle('hidden'));
+</script>
+</body>
+</html>
