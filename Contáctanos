@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto — Little Caesars</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .font-bebas { font-family: 'Bebas Neue', cursive; }
+        .gradient-text { background: linear-gradient(45deg, #47281d, #f7931e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .nav-link { position: relative; transition: all 0.3s ease; }
+        .nav-link::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 3px; background: #ff6b35; transition: width 0.3s ease; }
+        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+        .nav-link.active { color: #f97316 !important; }
+
+        .hero-contact { background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ff3e00 100%); position: relative; overflow: hidden; }
+        .hero-dots { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px); background-size: 30px 30px; }
+
+        .contact-card { background: #fff; border-radius: 18px; padding: 24px 28px; border: 1px solid #f0f0f0; box-shadow: 0 4px 20px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 18px; transition: all 0.3s ease; text-decoration: none; color: inherit; }
+        .contact-card:hover { transform: translateY(-5px); box-shadow: 0 16px 36px rgba(255,107,53,0.14); border-color: #ffd0b8; }
+        .c-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+
+        .form-field { width: 100%; border: 1.5px solid #e8e8e8; border-radius: 12px; padding: 12px 15px; font-family: 'Inter', sans-serif; font-size: 0.9rem; outline: none; transition: all 0.2s; background: #fafafa; color: #1a1a1a; resize: vertical; }
+        .form-field:focus { border-color: #ff6b35; background: #fff; box-shadow: 0 0 0 4px rgba(255,107,53,0.08); }
+        .form-field::placeholder { color: #c8c8c8; }
+        .flabel { display: block; font-weight: 700; font-size: 0.77rem; text-transform: uppercase; letter-spacing: 0.06em; color: #666; margin-bottom: 6px; }
+
+        .btn-send { background: linear-gradient(135deg,#ff6b35,#f7931e); color:#fff; border:none; border-radius:12px; padding:14px 28px; font-family:'Bebas Neue',cursive; font-size:1.15rem; letter-spacing:0.1em; cursor:pointer; width:100%; box-shadow:0 6px 20px rgba(255,107,53,0.4); transition:all 0.2s; }
+        .btn-send:hover { transform:translateY(-3px); box-shadow:0 10px 30px rgba(255,107,53,0.5); }
+        .btn-send:disabled { opacity:0.7; cursor:not-allowed; transform:none; }
+
+        .social-btn { display:flex; align-items:center; gap:9px; padding:11px 18px; border-radius:12px; font-weight:700; font-size:0.85rem; text-decoration:none; transition:all 0.2s; border:1.5px solid transparent; }
+        .social-btn:hover { transform:translateY(-3px); }
+        .soc-wa  { background:#e8fdf1; color:#16a34a; border-color:#bbf7d0; }
+        .soc-wa:hover  { background:#25d366; color:#fff; box-shadow:0 6px 18px rgba(37,211,102,0.4); }
+        .soc-ig  { background:#fdf2f8; color:#c026d3; border-color:#f5d0fe; }
+        .soc-ig:hover  { background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); color:#fff; box-shadow:0 6px 18px rgba(200,30,100,0.4); }
+        .soc-fb  { background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
+        .soc-fb:hover  { background:#1877f2; color:#fff; box-shadow:0 6px 18px rgba(24,119,242,0.4); }
+
+        .map-wrap { background:linear-gradient(135deg,#1a1a2e,#0f3460); border-radius:18px; height:260px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:#fff; position:relative; overflow:hidden; }
+        .map-grid { position:absolute; inset:0; background-image: linear-gradient(rgba(255,107,53,0.06) 1px,transparent 1px), linear-gradient(90deg,rgba(255,107,53,0.06) 1px,transparent 1px); background-size:38px 38px; }
+        .pin-anim { animation:pinBounce 2s ease-in-out infinite; position:relative; z-index:2; }
+        @keyframes pinBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    </style>
+</head>
+<body class="bg-gray-50" style="font-family:'Inter',sans-serif;">
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <a href="index.html" class="flex items-center">
+                <img src="logo.jpg" alt="Little Caesars" class="h-10 w-auto">
+                <span class="font-bebas text-3xl ml-3 gradient-text">Little Caesars</span>
+            </a>
+            <div class="hidden md:flex items-baseline space-x-8">
+                <a href="index.html" class="nav-link text-gray-900 hover:text-orange-500 px-3 py-2 text-sm font-medium">INICIO</a>
+                <a href="menu.php"       class="nav-link text-gray-900 hover:text-orange-500 px-3 py-2 text-sm font-medium">MENÚ</a>
+                <a href="CONTACTO.html"   class="nav-link active text-gray-900 px-3 py-2 text-sm font-medium">CONTACTO</a>
+                <a href="sucursales.html"      class="nav-link text-gray-900 hover:text-orange-500 px-3 py-2 text-sm font-medium">SUCURSALES</a>
+                <a href="acerca-de-nosotros.html" class="nav-link text-gray-900 hover:text-orange-500 px-3 py-2 text-sm font-medium">NOSOTROS</a>
+            </div>
+            <button id="mb-btn" class="md:hidden text-gray-900"><i class="fas fa-bars text-xl"></i></button>
+        </div>
+    </div>
+    <div id="mb-menu" class="hidden md:hidden bg-white border-t">
+        <div class="px-2 pt-2 pb-3 space-y-1">
+            <a href="little (2).html" class="block px-3 py-2 text-gray-900 font-medium">INICIO</a>
+            <a href="menu.php"       class="block px-3 py-2 text-gray-900 font-medium">MENÚ</a>
+            <a href="CONTACTO.html"   class="block px-3 py-2 text-orange-600 font-bold">CONTACTO</a>
+            <a href="index.html"      class="block px-3 py-2 text-gray-900 font-medium">SUCURSALES</a>
+            <a href="acerca-de-nosotros.html" class="block px-3 py-2 text-gray-900 font-medium">NOSOTROS</a>
+        </div>
+    </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero-contact pt-28 pb-16" style="min-height:280px;display:flex;align-items:center;">
+    <div class="hero-dots"></div>
+    <div class="max-w-7xl mx-auto px-4 text-center" style="position:relative;z-index:2;width:100%;">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.2);border-radius:50px;padding:5px 16px;margin-bottom:18px;">
+            <i class="fas fa-pizza-slice" style="color:#fff;font-size:0.82rem;"></i>
+            <span style="color:#fff;font-size:0.78rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;">Estamos para servirte</span>
+        </div>
+        <h1 class="font-bebas text-white" style="font-size:clamp(3.5rem,9vw,6.5rem);line-height:1;text-shadow:0 4px 20px rgba(0,0,0,0.18);">¡Contáctanos!</h1>
+        <p style="color:rgba(255,255,255,0.9);font-size:1.1rem;font-weight:300;margin-top:14px;max-width:480px;margin-left:auto;margin-right:auto;">¿Tienes alguna pregunta? Estamos listos para ayudarte.</p>
+    </div>
+</section>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<section class="py-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+
+            <!-- LEFT: Info -->
+            <div style="display:flex;flex-direction:column;gap:18px;">
+                <div>
+                    <h2 class="font-bebas gradient-text" style="font-size:2.1rem;letter-spacing:0.03em;margin-bottom:4px;">Información de contacto</h2>
+                    <p style="color:#888;font-size:0.88rem;">Comunícate con nosotros por cualquiera de estos medios.</p>
+                </div>
+
+                <a href="tel:8090000000" class="contact-card">
+                    <div class="c-icon" style="background:linear-gradient(135deg,#fff7f0,#ffe0c8);"><i class="fas fa-phone" style="color:#ff6b35;"></i></div>
+                    <div>
+                        <div style="font-weight:800;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;color:#bbb;margin-bottom:3px;">Teléfono</div>
+                        <div style="font-size:1.05rem;font-weight:700;color:#1a1a1a;">(809) 000-0000</div>
+                        <div style="font-size:0.8rem;color:#aaa;margin-top:1px;">Lun–Dom, 10am – 10pm</div>
+                    </div>
+                </a>
+
+                <a href="mailto:contacto@littlecaesars.do" class="contact-card">
+                    <div class="c-icon" style="background:linear-gradient(135deg,#f0f7ff,#d0e4ff);"><i class="fas fa-envelope" style="color:#3b82f6;"></i></div>
+                    <div>
+                        <div style="font-weight:800;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;color:#bbb;margin-bottom:3px;">Correo</div>
+                        <div style="font-size:0.98rem;font-weight:700;color:#1a1a1a;">contacto@littlecaesars.do</div>
+                        <div style="font-size:0.8rem;color:#aaa;margin-top:1px;">Respondemos en menos de 24h</div>
+                    </div>
+                </a>
+
+                <a href="https://maps.google.com" target="_blank" class="contact-card">
+                    <div class="c-icon" style="background:linear-gradient(135deg,#f0fdf4,#d0f7e0);"><i class="fas fa-map-marker-alt" style="color:#16a34a;"></i></div>
+                    <div>
+                        <div style="font-weight:800;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;color:#bbb;margin-bottom:3px;">Dirección</div>
+                        <div style="font-size:0.98rem;font-weight:700;color:#1a1a1a;">Av. Principal #123</div>
+                        <div style="font-size:0.82rem;color:#888;margin-top:1px;">Santo Domingo, República Dominicana</div>
+                    </div>
+                </a>
+
+                <!-- Map -->
+                <div class="map-wrap">
+                    <div class="map-grid"></div>
+                    <div class="pin-anim"><i class="fas fa-map-marker-alt" style="font-size:3rem;color:#ff6b35;filter:drop-shadow(0 4px 12px rgba(255,107,53,0.6));"></i></div>
+                    <p style="position:relative;z-index:2;font-weight:700;font-size:0.92rem;text-align:center;opacity:0.9;">Santo Domingo, República Dominicana</p>
+                    <a href="https://maps.google.com" target="_blank" style="position:relative;z-index:2;background:rgba(255,107,53,0.88);color:#fff;text-decoration:none;padding:7px 18px;border-radius:50px;font-size:0.8rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;transition:background 0.2s;" onmouseover="this.style.background='#ff6b35'" onmouseout="this.style.background='rgba(255,107,53,0.88)'">
+                        <i class="fas fa-external-link-alt" style="margin-right:5px;"></i>Ver en Google Maps
+                    </a>
+                </div>
+
+                <!-- Redes -->
+                <div>
+                    <p style="font-weight:800;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;color:#bbb;margin-bottom:10px;">Síguenos en redes</p>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <a href="https://wa.me/18090000000" target="_blank" class="social-btn soc-wa"><i class="fab fa-whatsapp" style="font-size:1.05rem;"></i> WhatsApp</a>
+                        <a href="https://instagram.com/littlecaesars" target="_blank" class="social-btn soc-ig"><i class="fab fa-instagram" style="font-size:1.05rem;"></i> Instagram</a>
+                        <a href="https://facebook.com/littlecaesars" target="_blank" class="social-btn soc-fb"><i class="fab fa-facebook-f" style="font-size:1.05rem;"></i> Facebook</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Form + Hours -->
+            <div>
+                <div style="background:#fff;border-radius:22px;padding:32px;box-shadow:0 8px 36px rgba(0,0,0,0.07);border:1px solid #f0f0f0;">
+                    <h2 class="font-bebas gradient-text" style="font-size:2.1rem;letter-spacing:0.03em;margin-bottom:4px;">Envíanos un mensaje</h2>
+                    <p style="color:#888;font-size:0.88rem;margin-bottom:22px;">Responderemos lo antes posible.</p>
+                    <div style="display:grid;gap:14px;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div><label class="flabel">Nombre *</label><input id="f-nom" type="text" class="form-field" placeholder="Tu nombre"></div>
+                            <div><label class="flabel">Apellido *</label><input id="f-ape" type="text" class="form-field" placeholder="Tu apellido"></div>
+                        </div>
+                        <div><label class="flabel">Correo electrónico *</label><input id="f-email" type="email" class="form-field" placeholder="tu@correo.com"></div>
+                        <div><label class="flabel">Teléfono</label><input id="f-tel" type="tel" class="form-field" placeholder="(809) 000-0000"></div>
+                        <div>
+                            <label class="flabel">Asunto *</label>
+                            <select id="f-asunto" class="form-field">
+                                <option value="">Selecciona un asunto…</option>
+                                <option value="pedido">Consulta sobre pedido</option>
+                                <option value="queja">Queja o sugerencia</option>
+                                <option value="franquicia">Información de franquicia</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        <div><label class="flabel">Mensaje *</label><textarea id="f-msg" class="form-field" rows="5" placeholder="Escribe tu mensaje aquí…"></textarea></div>
+                        <button class="btn-send" id="send-btn" onclick="enviarMensaje()">
+                            <i class="fas fa-paper-plane" style="margin-right:8px;"></i> ENVIAR MENSAJE
+                        </button>
+                        <div id="success-box" style="display:none;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:14px 18px;color:#16a34a;font-weight:600;display:none;align-items:center;gap:10px;">
+                            <i class="fas fa-check-circle" style="font-size:1.2rem;"></i>
+                            <span>¡Mensaje enviado! Te responderemos pronto 🍕</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Horarios -->
+                <div style="background:linear-gradient(135deg,#1a1a1a,#2d2d2d);border-radius:20px;padding:26px 30px;margin-top:18px;color:#fff;">
+                    <h3 class="font-bebas" style="font-size:1.55rem;letter-spacing:0.04em;color:#f7931e;margin-bottom:14px;">Horarios de atención</h3>
+                    <div style="display:grid;gap:10px;font-size:0.87rem;">
+                        <div style="display:flex;justify-content:space-between;padding-bottom:9px;border-bottom:1px solid rgba(255,255,255,0.08);"><span style="color:#aaa;">Lunes – Viernes</span><span style="font-weight:700;">10:00 am – 10:00 pm</span></div>
+                        <div style="display:flex;justify-content:space-between;padding-bottom:9px;border-bottom:1px solid rgba(255,255,255,0.08);"><span style="color:#aaa;">Sábado</span><span style="font-weight:700;">10:00 am – 11:00 pm</span></div>
+                        <div style="display:flex;justify-content:space-between;"><span style="color:#aaa;">Domingo</span><span style="font-weight:700;color:#ff6b35;">12:00 pm – 9:00 pm</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<footer class="bg-gray-900 text-white py-10">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+        <div class="flex items-center justify-center mb-4"><img src="logo.jpg" class="h-10 mr-3"><span class="font-bebas text-4xl gradient-text">Little Caesars</span></div>
+        <p class="text-gray-400 text-sm">© 2024 Little Caesar Pizzería. Todos los derechos reservados.</p>
+    </div>
+</footer>
+
+<script>
+document.getElementById('mb-btn').addEventListener('click',()=>document.getElementById('mb-menu').classList.toggle('hidden'));
+
+function enviarMensaje(){
+    const nom=document.getElementById('f-nom').value.trim();
+    const email=document.getElementById('f-email').value.trim();
+    const asunto=document.getElementById('f-asunto').value;
+    const msg=document.getElementById('f-msg').value.trim();
+    const btn=document.getElementById('send-btn');
+    if(!nom||!email||!asunto||!msg){
+        btn.style.background='linear-gradient(135deg,#ef4444,#dc2626)';
+        btn.innerHTML='<i class="fas fa-exclamation-circle" style="margin-right:8px;"></i>Completa todos los campos';
+        setTimeout(()=>{btn.style.background='';btn.innerHTML='<i class="fas fa-paper-plane" style="margin-right:8px;"></i> ENVIAR MENSAJE';},2200);
+        return;
+    }
+    btn.innerHTML='<i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i>Enviando…';
+    btn.disabled=true;
+    setTimeout(()=>{
+        btn.innerHTML='<i class="fas fa-check" style="margin-right:8px;"></i>¡ENVIADO!';
+        btn.style.background='linear-gradient(135deg,#16a34a,#22c55e)';
+        const box=document.getElementById('success-box');
+        box.style.display='flex';
+        ['f-nom','f-ape','f-email','f-tel','f-msg'].forEach(id=>document.getElementById(id).value='');
+        document.getElementById('f-asunto').value='';
+        setTimeout(()=>{
+            btn.innerHTML='<i class="fas fa-paper-plane" style="margin-right:8px;"></i> ENVIAR MENSAJE';
+            btn.style.background='';btn.disabled=false;box.style.display='none';
+        },4000);
+    },1600);
+}
+</script>
+</body>
+</html>
